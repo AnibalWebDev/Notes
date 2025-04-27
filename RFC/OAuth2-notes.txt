@@ -1,0 +1,75 @@
+OAuth2 RFC 6749
+
+Introduction:
+
+   In the traditional client-server authentication model, the client requests an access-restricted resource (protected resource)
+   on the server by authenticating with the server using the resource owner's credentials.  In order to provide third-party
+   applications access to restricted resources, the resource owner shares its credentials with the third party.
+
+   Instead of using the resource owner's credentials to access protected resources, the client obtains an access token
+   -- a string denoting a specific scope, lifetime, and other access attributes.  Access tokens are issued to third-party clients
+   by an authorization server with the approval of the resource owner.  The client uses the access token to access the protected
+   resources hosted by the resource server.
+
+Roles:
+
+    -	Resource Owner (RO): (i.e. an end-user) Can grant access to protected resource (PR)
+    -	Resource Server (RS): Hosts PR; accepts and responds to requests using access tokens (AT)
+    -	Client (CL): Application making PR requests on behalf of RO w/ it's authorization
+    -	Authorizing Server (AS): Issues ATs to CL after authenticating RO and obtaining authorization
+
+Protocol Flow:
+
+    -	Authorization Request (AR)
+    -	Authorization Grant (AG):
+
+	   An authorization grant is a credential representing the resource
+	   owner's authorization (to access its protected resources) used by the
+	   client to obtain an access token.
+
+	   - Grant Types (GT):
+
+		-   Authorization Code (AC): Auth code obtained using AS intermediary between CL & RO
+		-   Implicit (IMP): Instead of issuing the CL an AC, the CL is issued an AT directly
+		-   Resource Owner Password Credentials (ROPC):(i.e., username and password) can be used directly as an AG to obtain an AT
+		-   Client Credentials (CLCD): Used as AG when CL is also RO or is requesting PR based on prior authorization
+
+    -	Figure 1:
+
+	    	+----+          +----+
+	    A:  | CL |====AR===>| RO | - CL sends AR to RO
+	    B:  |    |<===AG====|    | - CL recieves AG
+	    	|    |          +----+
+	    	|    |          +----+
+	    C:  |    |====AG===>| AS | - CL requests AT by authenticating w/ AS & presenting AG
+	    D:  |    |<===AT====|    | - AS authenticates CL & validates AG, if valid, issues AT
+	    	|    |          +----+
+	    	|    |          +----+
+	    E:  |    |====AT===>| RS | - CL requests PR from RS and authenticates by presenting AT
+	    F:  |    |<===PR====|    | - RS validates AT, if valid, serves PT
+	    	+----+          +----+
+
+	The preferred method for the client to obtain an authorization grant
+	from the resource owner (depicted in steps (A) and (B)) is to use the
+	authorization server as an intermediary
+
+    -	Access Tokens: Used to access PR; a string representing authorization (w/ specific scopes, and durations of access) issued to CL
+
+    -   Refresh Tokens (RT): Issued to the CL by RS; used to obtain new AT when current AT becomes invalid (INV) or expires
+
+    - Figure 2 - Refreshing Expired Access Tokens:
+
+	    	+----+                  +----+
+	    A:	| CL |=======AG========>| AS | -
+	    B:	|    |<======AT/RT=====>|    | -
+	    	|    |        +----+	|    |
+	    C:  |    |===AT==>| RS |	|    | -
+	    D:	|    |<==PR===|    |	|    | -
+	    E:	|    |===AT==>|    |	|    | -
+	    F:	|    |<==INV==|    |	|    | -
+	    	|    |	      +----+	|    |
+	    G:	|    |=======RT========>|    | -
+	    H:	|    |<======AT/RT======|    | -
+	    	+----+                  +----+
+
+
